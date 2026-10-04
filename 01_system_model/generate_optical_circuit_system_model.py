@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle, FancyBboxPatch, Polygon
+from matplotlib.patches import Rectangle, FancyBboxPatch
 
 # ============================================================
 # FINAL POLISHED OPTICAL QUANTUM CIRCUIT
@@ -14,9 +14,11 @@ plt.rcParams.update({
 })
 
 fig, ax = plt.subplots(figsize=(20, 7.2))
+
 ax.set_xlim(0, 180)
 ax.set_ylim(0, 62)
 ax.axis("off")
+
 
 # ============================================================
 # COLORS
@@ -32,16 +34,15 @@ BLUE = "#314CFF"
 
 COUPLING_EDGE = "#7E92A6"
 
-WG = "#B9B9B9"
-WG_DARK = "#6F7F90"
 
-PBS_FACE = "#B8CDE7"
-PBS_SIDE = "#93A9C3"
-PBS_HILITE = "#DEE8F5"
+# ============================================================
+# MAIN LEVELS
+# ============================================================
 
 YT = 43
 YM = 30
 YB = 17
+
 
 # ============================================================
 # OUTER PANEL
@@ -52,15 +53,18 @@ ax.add_patch(
         (1.5, 4),
         177,
         54,
+
         facecolor="white",
         edgecolor="#D7D7D7",
+
         linewidth=0.9,
         zorder=0
     )
 )
 
+
 # ============================================================
-# HELPERS
+# TEXT
 # ============================================================
 
 def txt(
@@ -74,17 +78,27 @@ def txt(
     color=DARK,
     z=30
 ):
+
     ax.text(
         x,
         y,
         s,
+
         fontsize=fs,
         fontweight=weight,
+
         ha=ha,
         va=va,
+
         color=color,
+
         zorder=z
     )
+
+
+# ============================================================
+# SECTION BOX
+# ============================================================
 
 def section(
     x0,
@@ -92,84 +106,107 @@ def section(
     title,
     color
 ):
+
     ax.add_patch(
         FancyBboxPatch(
             (x0, 7.2),
+
             x1-x0,
             46.3,
+
             boxstyle="round,pad=0.02,rounding_size=0.6",
+
             fill=False,
+
             edgecolor=color,
-            linewidth=1.35,
-            linestyle=(0, (6, 4)),
+
+            linewidth=1.25,
+
+            linestyle=(0, (6,4)),
+
             zorder=1
         )
     )
 
+
     txt(
         (x0+x1)/2,
         56.8,
+
         title,
+
         fs=10,
         weight="bold"
     )
 
+
+# ============================================================
+# GREEN OPTICAL PATH
+# ============================================================
+
 def beam(
     points,
-    lw=4.0,
+    lw=3.8,
     color=GREEN,
     z=5
 ):
-    p = np.asarray(points, float)
+
+    p = np.asarray(
+        points,
+        dtype=float
+    )
+
 
     ax.plot(
-        p[:, 0],
-        p[:, 1],
+        p[:,0],
+        p[:,1],
+
         color=color,
+
         linewidth=lw,
+
         solid_capstyle="round",
         solid_joinstyle="round",
+
         zorder=z
     )
 
-def waveguide(
-    points,
-    lw=1.75
-):
-    p = np.asarray(points, float)
 
-    ax.plot(
-        p[:, 0],
-        p[:, 1],
-        color=WG,
-        linewidth=lw,
-        solid_capstyle="butt",
-        solid_joinstyle="miter",
-        zorder=3
-    )
+# ============================================================
+# FLOW ARROW
+# ============================================================
 
 def arrow(
     p0,
     p1,
     color=GREEN,
-    lw=1.05,
+    lw=1.0,
     ms=8.5,
     z=20
 ):
+
     ax.annotate(
         "",
+
         xy=p1,
         xytext=p0,
+
         arrowprops=dict(
             arrowstyle="-|>",
+
             color=color,
+
             linewidth=lw,
+
             mutation_scale=ms,
+
             shrinkA=0,
             shrinkB=0
         ),
+
         zorder=z
     )
+
 
 # ============================================================
 # STANDARD PBS
@@ -180,163 +217,71 @@ def pbs_square(
     y,
     above=True,
     label=True,
-    size=3.3
+    size=3.35
 ):
+
+    # blue square
     ax.add_patch(
         Rectangle(
-            (x-size/2, y-size/2),
+            (
+                x-size/2,
+                y-size/2
+            ),
+
             size,
             size,
+
             facecolor="none",
+
             edgecolor=BLUE,
-            linewidth=2.0,
+
+            linewidth=1.9,
+
             zorder=10
         )
     )
 
+
+    # internal diagonal
     ax.plot(
-        [x-size*0.35, x+size*0.35],
-        [y-size*0.35, y+size*0.35],
+        [
+            x-size*0.35,
+            x+size*0.35
+        ],
+
+        [
+            y-size*0.35,
+            y+size*0.35
+        ],
+
         color=BLUE,
-        linewidth=1.6,
+
+        linewidth=1.5,
+
         zorder=11
     )
 
+
     if label:
-        off = size/2 + 0.95
+
+        offset = size/2 + 1.0
 
         txt(
             x,
-            y+off if above else y-off,
+
+            y+offset if above else y-offset,
+
             "PBS",
-            fs=8.7,
+
+            fs=8.8,
             weight="bold",
+
             va="bottom" if above else "top"
         )
 
-# ============================================================
-# 3D-LIKE COUPLING PBS
-# ============================================================
-
-def pbs_coupler_3d(
-    x,
-    y,
-    label
-):
-    dx = 0.55
-    dy = 0.40
-
-    # narrower + taller
-    w = 2.15
-    h = 3.75
-
-    # back diamond
-    back = np.array([
-        [x+dx,   y+h+dy],
-        [x+w+dx, y+dy],
-        [x+dx,   y-h+dy],
-        [x-w+dx, y+dy]
-    ])
-
-    ax.add_patch(
-        Polygon(
-            back,
-            closed=True,
-            facecolor=PBS_SIDE,
-            edgecolor=WG_DARK,
-            linewidth=0.9,
-            zorder=8
-        )
-    )
-
-    # front diamond
-    front = np.array([
-        [x,   y+h],
-        [x+w, y],
-        [x,   y-h],
-        [x-w, y]
-    ])
-
-    ax.add_patch(
-        Polygon(
-            front,
-            closed=True,
-            facecolor=PBS_FACE,
-            edgecolor=WG_DARK,
-            linewidth=1.1,
-            zorder=10
-        )
-    )
-
-    # top facet
-    ax.add_patch(
-        Polygon(
-            [front[0], front[1], back[1], back[0]],
-            closed=True,
-            facecolor=PBS_HILITE,
-            edgecolor=WG_DARK,
-            linewidth=0.6,
-            alpha=0.9,
-            zorder=9
-        )
-    )
-
-    # side facet
-    ax.add_patch(
-        Polygon(
-            [front[1], front[2], back[2], back[1]],
-            closed=True,
-            facecolor=PBS_SIDE,
-            edgecolor=WG_DARK,
-            linewidth=0.6,
-            alpha=0.9,
-            zorder=9
-        )
-    )
-
-    # inner crossed planes
-    ax.plot(
-        [x-1.55, x+1.55],
-        [y+2.65, y-2.65],
-        color=WG_DARK,
-        lw=0.85,
-        zorder=12
-    )
-
-    ax.plot(
-        [x-1.55, x+1.55],
-        [y-2.65, y+2.65],
-        color=WG_DARK,
-        lw=0.85,
-        zorder=12
-    )
-
-    ax.plot(
-        [x-0.65, x+0.65],
-        [y+3.0, y-3.0],
-        color="#7186A0",
-        lw=0.55,
-        zorder=12
-    )
-
-    ax.plot(
-        [x-0.65, x+0.65],
-        [y-3.0, y+3.0],
-        color="#7186A0",
-        lw=0.55,
-        zorder=12
-    )
-
-    txt(
-        x+0.1,
-        y-4.8,
-        label,
-        fs=8.7,
-        color="#404040"
-    )
 
 # ============================================================
-# MIRROR
+# 45 DEGREE MIRROR
 # ============================================================
 
 def mirror45(
@@ -345,166 +290,289 @@ def mirror45(
     orientation="/",
     above=True,
     label=True,
-    length=4.2
+    length=4.25
 ):
-    d = length / (2*np.sqrt(2))
+
+    d = length / (
+        2*np.sqrt(2)
+    )
+
 
     if orientation == "/":
-        xs = [x-d, x+d]
-        ys = [y-d, y+d]
+
+        xs = [
+            x-d,
+            x+d
+        ]
+
+        ys = [
+            y-d,
+            y+d
+        ]
+
     else:
-        xs = [x-d, x+d]
-        ys = [y+d, y-d]
+
+        xs = [
+            x-d,
+            x+d
+        ]
+
+        ys = [
+            y+d,
+            y-d
+        ]
+
 
     ax.plot(
         xs,
         ys,
+
         color="black",
-        linewidth=2.35,
+
+        linewidth=2.2,
+
         solid_capstyle="butt",
+
         zorder=12
     )
 
+
     if label:
+
         txt(
             x,
+
             y+3.15 if above else y-3.15,
+
             "M",
-            fs=8.7,
+
+            fs=8.8,
             weight="bold",
+
             va="bottom" if above else "top"
         )
 
+
 # ============================================================
-# LASER / SCREEN
+# LASER
 # ============================================================
 
 def laser(
     x,
     y
 ):
+
     ax.add_patch(
         Rectangle(
-            (x-1.8, y-2.4),
+            (
+                x-1.8,
+                y-2.4
+            ),
+
             3.6,
             4.8,
+
             facecolor="#D9483E",
             edgecolor="#93231D",
+
             linewidth=0.9,
+
             zorder=10
         )
     )
 
+
     txt(
         x,
-        y+3.4,
+        y+3.6,
+
         "Laser",
-        fs=8.7,
+
+        fs=8.8,
         weight="bold"
     )
+
+
+# ============================================================
+# SCREEN
+# ============================================================
 
 def screen(
     x,
     y
 ):
+
     ax.add_patch(
         Rectangle(
-            (x-0.45, y-9.6),
-            0.9,
-            19.2,
+            (
+                x-0.42,
+                y-8.8
+            ),
+
+            0.84,
+            17.6,
+
             facecolor="#D8E7F2",
+
             edgecolor="#8196A5",
+
             linewidth=1.0,
+
             zorder=10
         )
     )
 
+
     txt(
-        x+1.8,
-        y-10.9,
+        x+1.75,
+        y-10.4,
+
         "Screen",
-        fs=8.7,
+
+        fs=8.8,
         weight="bold",
+
         ha="left"
     )
 
+
 # ============================================================
-# SECTIONS
+# SECTION BOXES
 # ============================================================
 
-section(3, 42, "Preparation", PINK)
-section(44, 69, "CNOT-1", GREY)
-section(71, 104, "Coupling", COUPLING_EDGE)
-section(106, 131, "CNOT-2", GREY)
-section(133, 176, "Measurement", CYAN)
+section(
+    3,
+    42,
+    "Preparation",
+    PINK
+)
+
+section(
+    44,
+    69,
+    "CNOT-1",
+    GREY
+)
+
+section(
+    71,
+    104,
+    "Coupling",
+    COUPLING_EDGE
+)
+
+section(
+    106,
+    131,
+    "CNOT-2",
+    GREY
+)
+
+section(
+    133,
+    176,
+    "Measurement",
+    CYAN
+)
+
 
 # ============================================================
 # PREPARATION
 # ============================================================
 
-laser(7.0, YM)
+laser(
+    7.0,
+    YM
+)
 
+
+# Laser -> PBS
 beam([
     (8.8, YM),
     (22.5, YM)
 ])
 
+
 pbs_square(
     22.5,
     YM,
+
     above=True,
-    size=3.3
+
+    size=3.35
 )
 
+
+# PBS -> upper path
 beam([
     (22.5, YM),
     (22.5, YT)
 ])
 
+
+# PBS -> lower path
 beam([
     (22.5, YM),
     (22.5, YB)
 ])
 
+
+# Mirrors
 mirror45(
     22.5,
     YT,
+
     "/",
+
     True
 )
+
 
 mirror45(
     22.5,
     YB,
+
     "\\",
+
     False
 )
 
+
+# Upper path
 beam([
     (22.5, YT),
     (44.0, YT)
 ])
 
+
+# Lower path
 beam([
     (22.5, YB),
     (44.0, YB)
 ])
 
-txt(
-    37.0,
-    49.0,
-    r"Control path  $q_c$",
-    fs=8.7,
-    weight="bold"
-)
 
 txt(
     37.0,
-    10.8,
-    r"Target path  $q_t$",
-    fs=8.7,
+    49.1,
+
+    r"Control path  $q_c$",
+
+    fs=8.8,
     weight="bold"
 )
+
+
+txt(
+    37.0,
+    10.7,
+
+    r"Target path  $q_t$",
+
+    fs=8.8,
+    weight="bold"
+)
+
 
 # ============================================================
 # CNOT MODULE
@@ -516,109 +584,138 @@ def draw_cnot(
     section_left,
     section_right
 ):
+
     top_loop = 49.0
     bot_loop = 11.0
 
-    # direct upper rail
+
+    # Main rails
     beam([
         (section_left, YT),
         (section_right, YT)
     ])
 
-    # direct lower rail
+
     beam([
         (section_left, YB),
         (section_right, YB)
     ])
 
-    # PBS positions
+
+    # PBS
     pbs_square(
         x_left,
         YT,
+
         above=True,
-        size=3.3
+
+        size=3.35
     )
+
 
     pbs_square(
         x_right,
         YB,
+
         above=True,
-        size=3.3
+
+        size=3.35
     )
 
-    # left full vertical
+
+    # Left side
     beam([
         (x_left, bot_loop),
         (x_left, top_loop)
     ])
 
-    # top loop
+
+    # Top
     beam([
         (x_left, top_loop),
         (x_right, top_loop)
     ])
 
-    # right full vertical
+
+    # Right side
     beam([
         (x_right, top_loop),
         (x_right, bot_loop)
     ])
 
-    # bottom loop
+
+    # Bottom
     beam([
         (x_left, bot_loop),
         (x_right, bot_loop)
     ])
 
-    # mirrors
+
+    # Mirrors
     mirror45(
         x_left,
         top_loop,
+
         "/",
+
         True
     )
+
 
     mirror45(
         x_right,
         top_loop,
+
         "\\",
+
         True
     )
+
 
     mirror45(
         x_left,
         bot_loop,
+
         "\\",
+
         False
     )
+
 
     mirror45(
         x_right,
         bot_loop,
+
         "/",
+
         False
     )
 
-    # subtle flow arrows
+
+    # Subtle flow arrows
     arrow(
         (x_left+2.0, top_loop),
         (x_right-2.0, top_loop)
     )
 
-    arrow(
-        (x_left, YB+4.0),
-        (x_left, YT+2.0)
-    )
 
     arrow(
-        (x_right, YT-2.0),
-        (x_right, YB+4.0)
+        (x_left, YB+3.5),
+        (x_left, YT+3.5)
     )
+
+
+    arrow(
+        (x_right, YT-3.5),
+        (x_right, YB+3.5)
+    )
+
 
     arrow(
         (x_right-2.0, bot_loop),
         (x_left+2.0, bot_loop)
     )
+
 
 # ============================================================
 # CNOT-1
@@ -627,90 +724,158 @@ def draw_cnot(
 draw_cnot(
     53.0,
     63.0,
+
     44.0,
     71.0
 )
 
+
 # ============================================================
 # COUPLING
+# All paths GREEN
+# PBS design SAME as all other PBS
 # ============================================================
 
+# subtle panel background
 ax.add_patch(
     Rectangle(
-        (72.0, 16.2),
+        (72.0, 16.3),
+
         31.0,
-        27.6,
-        facecolor="#F5F5F5",
+        27.4,
+
+        facecolor="#F7F7F7",
+
         edgecolor="none",
+
         zorder=0.5
     )
 )
 
+
 p1x = 80.0
 p2x = 94.0
 
-# left rails -> PBS1
-waveguide([
+
+# ------------------------------------------------------------
+# LEFT INPUT -> PBS1
+# ------------------------------------------------------------
+
+beam([
     (71.0, YT),
     (76.0, YT),
     (p1x, YM)
-])
+], lw=3.6)
 
-waveguide([
+
+beam([
     (71.0, YB),
     (76.0, YB),
     (p1x, YM)
-])
+], lw=3.6)
 
-# PBS1 -> middle rails
-waveguide([
+
+# ------------------------------------------------------------
+# PBS1 -> MIDDLE UPPER / LOWER
+# ------------------------------------------------------------
+
+beam([
     (p1x, YM),
     (84.0, YT),
     (89.5, YT)
-])
+], lw=3.6)
 
-waveguide([
+
+beam([
     (p1x, YM),
     (84.0, YB),
     (89.5, YB)
-])
+], lw=3.6)
 
-# middle rails -> PBS2
-waveguide([
+
+# ------------------------------------------------------------
+# MIDDLE -> PBS2
+# ------------------------------------------------------------
+
+beam([
     (89.5, YT),
     (p2x, YM)
-])
+], lw=3.6)
 
-waveguide([
+
+beam([
     (89.5, YB),
     (p2x, YM)
-])
+], lw=3.6)
 
-# PBS2 -> output rails
-waveguide([
+
+# ------------------------------------------------------------
+# PBS2 -> OUTPUT
+# ------------------------------------------------------------
+
+beam([
     (p2x, YM),
     (98.0, YT),
     (106.0, YT)
-])
+], lw=3.6)
 
-waveguide([
+
+beam([
     (p2x, YM),
     (98.0, YB),
     (106.0, YB)
-])
+], lw=3.6)
 
-# 3D coupling PBS
-pbs_coupler_3d(
+
+# ------------------------------------------------------------
+# NORMAL PBS — SAME DESIGN AS ALL OTHER PBS
+# ------------------------------------------------------------
+
+pbs_square(
     p1x,
     YM,
-    r"PBS$_1$"
+
+    above=False,
+    label=False,
+
+    size=3.35
 )
 
-pbs_coupler_3d(
+
+pbs_square(
     p2x,
     YM,
-    r"PBS$_2$"
+
+    above=False,
+    label=False,
+
+    size=3.35
 )
+
+
+txt(
+    p1x,
+    YM-4.5,
+
+    r"PBS$_1$",
+
+    fs=8.6,
+
+    color="#444444"
+)
+
+
+txt(
+    p2x,
+    YM-4.5,
+
+    r"PBS$_2$",
+
+    fs=8.6,
+
+    color="#444444"
+)
+
 
 # ============================================================
 # CNOT-2
@@ -719,9 +884,11 @@ pbs_coupler_3d(
 draw_cnot(
     115.0,
     125.0,
+
     106.0,
     133.0
 )
+
 
 # ============================================================
 # MEASUREMENT
@@ -729,134 +896,184 @@ draw_cnot(
 
 mx = 148.0
 
-# main upper/lower rails
+
+# Upper main line
 beam([
     (133.0, YT),
-    (154.0, YT)
+    (156.0, YT)
 ])
 
+
+# Lower main line
 beam([
     (133.0, YB),
-    (154.0, YB)
+    (156.0, YB)
 ])
 
-# ------------------------------------------------------------
-# Upper PBS
-# ------------------------------------------------------------
+
+# ============================================================
+# UPPER PBS
+# ============================================================
 
 pbs_square(
     mx,
     YT,
+
     above=False,
+
     size=3.5
 )
 
+
+# V branch
 beam([
     (mx, YT),
     (mx, 49.0),
-    (154.0, 49.0)
+    (155.0, 49.0)
 ])
+
 
 mirror45(
     mx,
     49.0,
+
     "/",
+
     True
 )
 
+
 txt(
-    156.0,
+    157.0,
     49.0,
+
     "V",
+
     fs=9.5,
     weight="bold"
 )
 
+
 txt(
-    160.0,
+    161.0,
     49.0,
+
     r"$|10\rangle$",
+
     fs=9.5,
     ha="left"
 )
 
+
+# H branch
 txt(
-    156.0,
+    157.0,
     YT,
+
     "H",
+
     fs=9.5,
     weight="bold"
 )
 
+
 txt(
-    160.0,
+    161.0,
     YT,
+
     r"$|00\rangle$",
+
     fs=9.5,
     ha="left"
 )
 
-# ------------------------------------------------------------
-# Lower PBS
-# ------------------------------------------------------------
+
+# ============================================================
+# LOWER PBS
+# ============================================================
 
 pbs_square(
     mx,
     YB,
+
     above=True,
+
     size=3.5
 )
 
+
+# H branch
 txt(
-    156.0,
+    157.0,
     YB,
+
     "H",
+
     fs=9.5,
     weight="bold"
 )
 
+
 txt(
-    160.0,
+    161.0,
     YB,
+
     r"$|01\rangle$",
+
     fs=9.5,
     ha="left"
 )
 
+
+# V branch
 beam([
     (mx, YB),
     (mx, 11.0),
-    (154.0, 11.0)
+    (155.0, 11.0)
 ])
+
 
 mirror45(
     mx,
     11.0,
+
     "\\",
+
     False
 )
 
+
 txt(
-    156.0,
+    157.0,
     11.0,
+
     "V",
+
     fs=9.5,
     weight="bold"
 )
 
+
 txt(
-    160.0,
+    161.0,
     11.0,
+
     r"$|11\rangle$",
+
     fs=9.5,
     ha="left"
 )
 
-# Screen slightly closer
+
+# ============================================================
+# SCREEN
+# ============================================================
+
 screen(
-    167.0,
+    168.5,
     YM
 )
+
 
 # ============================================================
 # LEGEND
@@ -864,14 +1081,18 @@ screen(
 
 txt(
     90.0,
-    2.6,
+    2.5,
+
     "PBS = Polarizing Beam Splitter   |   "
-    "PBS$_1$, PBS$_2$ = 3D coupling PBSs   |   "
+    "PBS$_1$, PBS$_2$ = coupling PBSs   |   "
     "M = 45° Mirror   |   "
     "V/H = polarization outputs",
-    fs=8.4,
+
+    fs=8.5,
+
     color="#4E565C"
 )
+
 
 # ============================================================
 # FINAL LAYOUT
@@ -884,27 +1105,42 @@ fig.subplots_adjust(
     bottom=0.08
 )
 
+
 # ============================================================
-# SAVE
+# EXPORT
 # ============================================================
 
 plt.savefig(
-    "optical_quantum_circuit_final_polished.png",
+    "optical_quantum_circuit_FINAL.png",
+
     dpi=600,
+
     bbox_inches="tight",
+
     facecolor="white"
 )
 
+
 plt.savefig(
-    "optical_quantum_circuit_final_polished.pdf",
+    "optical_quantum_circuit_FINAL.pdf",
+
     bbox_inches="tight",
+
     facecolor="white"
 )
 
+
 plt.savefig(
-    "optical_quantum_circuit_final_polished.svg",
+    "optical_quantum_circuit_FINAL.svg",
+
     bbox_inches="tight",
+
     facecolor="white"
 )
+
+
+# ============================================================
+# SHOW
+# ============================================================
 
 plt.show()
